@@ -62,13 +62,21 @@ final class HealthKitService: ObservableObject {
     // MARK: - Authorization
 
     /// Requests read authorization for blood pressure data from HealthKit.
+    ///
+    /// **Important:** `toShare` must be `nil`, not an empty `Set`. Passing an empty
+    /// `Set<HKSampleType>` causes HealthKit to call
+    /// `_throwIfAuthorizationDisallowedForSharing` and throw an `NSException`,
+    /// crashing the app even when the app only needs read access.
+    /// Passing `nil` explicitly tells HealthKit "no write types requested" and
+    /// bypasses the sharing-authorization guard entirely.
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else { return }
 
         let typesToRead: Set<HKObjectType> = [bpCorrelationType, systolicType, diastolicType]
 
         do {
-            try await store.requestAuthorization(toShare: [], read: typesToRead)
+            // toShare: nil — we never write to HealthKit; passing [] triggers a crash.
+            try await store.requestAuthorization(toShare: nil, read: typesToRead)
             isAuthorized = true
         } catch {
             syncError = error
