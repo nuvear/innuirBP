@@ -8,6 +8,7 @@
 import Foundation
 import HealthKit
 import SwiftData
+import WidgetKit
 
 // MARK: - HealthKit Service
 
@@ -18,6 +19,8 @@ import SwiftData
 /// 2. Fetch all `HKCorrelation` blood pressure samples since the last sync date.
 /// 3. Convert them to `BPReading` model objects and insert into SwiftData.
 /// 4. Persist the last sync date so future syncs are incremental.
+/// 5. Write a lightweight JSON snapshot to the App Group UserDefaults so the
+///    WidgetKit extension can display up-to-date data without SwiftData access.
 @MainActor
 final class HealthKitService: ObservableObject {
 
@@ -25,6 +28,11 @@ final class HealthKitService: ObservableObject {
 
     static let shared = HealthKitService()
     private let store = HKHealthStore()
+
+    // MARK: - App Group identifier (must match Xcode entitlements)
+
+    static let appGroupID = "group.com.innuir.bp"
+    static let widgetSnapshotKey = "bp_readings"
 
     // MARK: - Published State
 
@@ -73,6 +81,11 @@ final class HealthKitService: ObservableObject {
     /// Fetches new blood pressure readings from HealthKit since the last sync date
     /// and inserts them into the provided SwiftData model context.
     ///
+    /// After inserting new readings, this method also writes a lightweight JSON
+    /// snapshot of the 30 most recent readings to the shared App Group UserDefaults,
+    /// so the WidgetKit extension can display up-to-date data without needing
+    /// direct SwiftData access.
+    ///
     /// - Parameter context: The SwiftData `ModelContext` to insert new readings into.
     func syncFromHealthKit(context: ModelContext) async {
         guard isAuthorized else {
@@ -113,11 +126,46 @@ final class HealthKitService: ObservableObject {
             try context.save()
             lastSyncDate = endDate
 
+            // After saving, refresh the widget snapshot with all current readings.
+            let allDescriptor = FetchDescriptor<BPReading>(
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
+            let allReadings = try context.fetch(allDescriptor)
+            writeWidgetSnapshot(from: allReadings)
+
         } catch {
             syncError = error
         }
 
         isSyncing = false
+    }
+
+    // MARK: - Widget Snapshot
+
+    /// Writes a JSON snapshot of the 30 most recent readings to the shared
+    /// App Group UserDefaults so the WidgetKit extension can read them.
+    ///
+    /// This must be called after any data mutation (sync or manual entry).
+    ///
+    /// - Parameter readings: All readings, sorted by timestamp descending.
+    func writeWidgetSnapshot(from readings: [BPReading]) {
+        let snapshots = readings.prefix(30).map {
+            BPReadingSnapshot(
+                systolic: $0.systolic,
+                diastolic: $0.diastolic,
+                timestamp: $0.timestamp
+            )
+        }
+
+        guard
+            let data = try? JSONEncoder().encode(Array(snapshots)),
+            let defaults = UserDefaults(suiteName: Self.appGroupID)
+        else { return }
+
+        defaults.set(data, forKey: Self.widgetSnapshotKey)
+
+        // Notify WidgetKit to reload all timelines immediately.
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Private Helpers

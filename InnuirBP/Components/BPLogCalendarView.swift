@@ -59,7 +59,17 @@ struct BPLogSection: View {
                 // Calendar grid
                 BPCalendarGrid(
                     month: displayedMonth,
-                    readings: readings
+                    readings: readings,
+                    onPreviousMonth: {
+                        if let prev = Calendar.current.date(byAdding: .month, value: -1, to: displayedMonth) {
+                            displayedMonth = Calendar.current.startOfMonth(for: prev)
+                        }
+                    },
+                    onNextMonth: {
+                        if let next = Calendar.current.date(byAdding: .month, value: 1, to: displayedMonth) {
+                            displayedMonth = Calendar.current.startOfMonth(for: next)
+                        }
+                    }
                 )
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
@@ -92,6 +102,8 @@ struct BPLogSection: View {
 struct BPCalendarGrid: View {
     let month: Date
     let readings: [BPReading]
+    let onPreviousMonth: () -> Void
+    let onNextMonth: () -> Void
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
@@ -101,9 +113,7 @@ struct BPCalendarGrid: View {
         VStack(spacing: 0) {
             // Month header with navigation
             HStack {
-                Button {
-                    // Navigate to previous month (handled by parent)
-                } label: {
+                Button(action: onPreviousMonth) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color(.systemBlue))
@@ -113,13 +123,13 @@ struct BPCalendarGrid: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color(.secondaryLabel))
                 Spacer()
-                Button {
-                    // Navigate to next month (handled by parent)
-                } label: {
+                Button(action: onNextMonth) {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(.systemBlue))
+                        // Disable the forward button when already on the current month.
+                        .foregroundStyle(isCurrentMonth ? Color(.systemGray3) : Color(.systemBlue))
                 }
+                .disabled(isCurrentMonth)
             }
             .padding(.bottom, 8)
 
@@ -154,6 +164,12 @@ struct BPCalendarGrid: View {
     }
 
     // MARK: - Helpers
+
+    /// Returns `true` when the displayed month is the current calendar month,
+    /// preventing the user from navigating into the future.
+    private var isCurrentMonth: Bool {
+        calendar.isDate(month, equalTo: Date(), toGranularity: .month)
+    }
 
     private var monthLabel: String {
         let formatter = DateFormatter()

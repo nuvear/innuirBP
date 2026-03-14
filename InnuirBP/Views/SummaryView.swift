@@ -32,6 +32,7 @@ struct SummaryView: View {
 
     // MARK: - Environment & Data
 
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \BPReading.timestamp, order: .reverse) private var readings: [BPReading]
     @EnvironmentObject private var healthKitService: HealthKitService
 
@@ -177,7 +178,10 @@ struct SummaryView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    Task { await healthKitService.syncFromHealthKit(context: ModelContext(try! iCloudSyncService.makeModelContainer())) }
+                    // Use the shared modelContext from the SwiftUI environment
+                    // to avoid creating a second, isolated ModelContainer that
+                    // would not reflect changes in the main app's data store.
+                    Task { await healthKitService.syncFromHealthKit(context: modelContext) }
                 } label: {
                     if healthKitService.isSyncing {
                         ProgressView().scaleEffect(0.8)

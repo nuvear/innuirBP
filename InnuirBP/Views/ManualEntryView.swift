@@ -21,6 +21,7 @@ struct ManualEntryView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var healthKitService: HealthKitService
 
     // MARK: - State
 
@@ -163,11 +164,15 @@ struct ManualEntryView: View {
                 Spacer()
 
                 // ── Custom Numeric Keypad ──────────────────────────────────
+                // The custom numeric keypad is shown on iOS/iPadOS only.
+                // On Mac Catalyst the system keyboard is used instead.
+                #if !targetEnvironment(macCatalyst)
                 BPNumericKeypad { key in
                     handleKeyInput(key)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
+                #endif
 
                 // ── Validation Error ───────────────────────────────────────
                 if showValidationError {
@@ -248,6 +253,16 @@ struct ManualEntryView: View {
         )
         modelContext.insert(reading)
         try? modelContext.save()
+
+        // Refresh the widget snapshot so the WidgetKit extension reflects
+        // the newly added manual entry immediately.
+        let descriptor = FetchDescriptor<BPReading>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        if let allReadings = try? modelContext.fetch(descriptor) {
+            healthKitService.writeWidgetSnapshot(from: allReadings)
+        }
+
         dismiss()
     }
 }

@@ -1,78 +1,117 @@
+'''
 {
-  "source": "American Heart Association",
-  "stages": {
-    "normal": {
-      "name": "Normal", 
-      "thresholds": [120, 80],
-      "bands": [
-        {"from": 120, "to": 0, "color": "gray"},
-        {"from": 80, "to": 0, "color": "red"}
-      ],
-      "labels": [
-        {"text": "Below 120", "value": 120},
-        {"text": "And", "value": 100},
-        {"text": "Below 80", "value": 80}
-      ]
-    },
-
-    "elevated": {
-      "name": "Elevated",
-      "thresholds": [129,120,80],
-      "bands": [
-        {"from":129,"to":120,"color":"gray"},
-        {"from":80,"to":0,"color":"red"}
-      ],
-      "labels":[
-        {"text":"129","value":129},
-        {"text":"120","value":120},
-        {"text":"And","value":100},
-        {"text":"Below 80","value":80}
-      ]
-    },
-
-    "stage1":{
-      "name": "Hypertension - Stage 1",
-      "thresholds":[139,130,89,80],
-      "bands":[
-        {"from":139,"to":130,"color":"gray"},
-        {"from":89,"to":80,"color":"red"}
-      ],
-      "labels":[
-        {"text":"139","value":139},
-        {"text":"130","value":130},
-        {"text":"Or","value":110},
-        {"text":"89","value":89},
-        {"text":"80","value":80}
-      ]
-    },
-
-    "stage2":{
-      "name": "Hypertension - Stage 2",
-      "thresholds":[140,90],
-      "bands":[
-        {"from":999,"to":140,"color":"gray"},
-        {"from":999,"to":90,"color":"red"}
-      ],
-      "labels":[
-        {"text":"Above 140","value":140},
-        {"text":"Or","value":110},
-        {"text":"Above 90","value":90}
-      ]
-    },
-
-    "crisis":{
-      "name": "Hypertensive Crisis",
-      "thresholds":[180,120],
-      "bands":[
-        {"from":999,"to":180,"color":"gray"},
-        {"from":999,"to":120,"color":"red"}
-      ],
-      "labels":[
-        {"text":"Above 180","value":180},
-        {"text":"Or","value":160},
-        {"text":"Above 120","value":120}
-      ]
-    }
-
-  }
+    "guideline": "AHA/ACC",
+    "version": "2017",
+    "source": "2017 ACC/AHA/AAPA/ABC/ACPM/AGS/APhA/ASH/ASPC/NMA/PCNA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults",
+    "description": "Guideline from the American College of Cardiology and the American Heart Association.",
+    "stages": [
+        {
+            "id": "crisis",
+            "name": "Hypertensive Crisis",
+            "shortName": "Crisis",
+            "systolicMin": 180,
+            "systolicMax": null,
+            "diastolicMin": 120,
+            "diastolicMax": null,
+            "color": "#D93838",
+            "description": "Consult your doctor immediately."
+        },
+        {
+            "id": "stage2",
+            "name": "Hypertension Stage 2",
+            "shortName": "Stage 2",
+            "systolicMin": 140,
+            "systolicMax": 180,
+            "diastolicMin": 90,
+            "diastolicMax": 120,
+            "color": "#FF8A00",
+            "description": "Systolic 140-179 mmHg or Diastolic 90-119 mmHg."
+        },
+        {
+            "id": "stage1",
+            "name": "Hypertension Stage 1",
+            "shortName": "Stage 1",
+            "systolicMin": 130,
+            "systolicMax": 140,
+            "diastolicMin": 80,
+            "diastolicMax": 90,
+            "color": "#FFB800",
+            "description": "Systolic 130-139 mmHg or Diastolic 80-89 mmHg."
+        },
+        {
+            "id": "elevated",
+            "name": "Elevated",
+            "shortName": "Elevated",
+            "systolicMin": 120,
+            "systolicMax": 130,
+            "diastolicMin": null,
+            "diastolicMax": 80,
+            "color": "#F2E30C",
+            "description": "Systolic 120-129 mmHg and Diastolic less than 80 mmHg."
+        },
+        {
+            "id": "normal",
+            "name": "Normal",
+            "shortName": "Normal",
+            "systolicMin": null,
+            "systolicMax": 120,
+            "diastolicMin": null,
+            "diastolicMax": 80,
+            "color": "#5EBA45",
+            "description": "Systolic less than 120 mmHg and Diastolic less than 80 mmHg."
+        }
+    ],
+    "chartBands": [
+        {
+            "id": "normal-band",
+            "yMin": 0,
+            "yMax": 120,
+            "color": "#8E8E931A",
+            "label": "Normal"
+        },
+        {
+            "id": "elevated-band",
+            "yMin": 120,
+            "yMax": 130,
+            "color": "#FFB8001A",
+            "label": "Elevated"
+        },
+        {
+            "id": "stage1-band",
+            "yMin": 130,
+            "yMax": 140,
+            "color": "#FF8A001A",
+            "label": "Stage 1"
+        },
+        {
+            "id": "stage2-band",
+            "yMin": 140,
+            "yMax": 180,
+            "color": "#D938381A",
+            "label": "Stage 2"
+        }
+    ],
+    "thresholdLines": [
+        {
+            "value": 80,
+            "label": "80",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 120,
+            "label": "120",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 130,
+            "label": "130",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 140,
+            "label": "140",
+            "color": "#8E8E93"
+        }
+    ]
 }
+'''
