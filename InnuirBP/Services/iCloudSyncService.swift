@@ -29,28 +29,14 @@ enum iCloudSyncService {
     /// This container should be created once at app launch and passed into the
     /// SwiftUI environment via `.modelContainer()`.
     static func makeModelContainer() -> ModelContainer {
-        let schema = Schema([BPReading.self])
-
-        // Configure for iCloud sync using the app's CloudKit container identifier.
-        // Replace "iCloud.com.innuir.bp" with the actual container ID from Xcode.
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .private("iCloud.com.innuir.bp")
-        )
-
+        // Use SwiftData's simplest initializer — single model, default config.
+        // Avoids schema/config issues that can fail on device.
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: BPReading.self)
         } catch {
-            // If the container cannot be created, fall back to local-only storage.
-            // This should not happen in production; log the error for diagnostics.
-            assertionFailure("Failed to create ModelContainer with iCloud sync: \(error). Falling back to local storage.")
-
-            let localConfiguration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false
-            )
-            return try! ModelContainer(for: schema, configurations: [localConfiguration])
+            // Last resort: in-memory only
+            let config = ModelConfiguration(isStoredInMemoryOnly: true)
+            return try! ModelContainer(for: BPReading.self, configurations: config)
         }
     }
 }

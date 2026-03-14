@@ -15,16 +15,12 @@ struct InnuirBPApp: App {
 
     // MARK: - Services
 
-    @StateObject private var healthKitService = HealthKitService()
+    @StateObject private var healthKitService = HealthKitService.shared
 
     // MARK: - SwiftData Container
 
     private let modelContainer: ModelContainer = {
-        do {
-            return try iCloudSyncService.makeModelContainer()
-        } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
-        }
+        iCloudSyncService.makeModelContainer()
     }()
 
     // MARK: - Scene
@@ -33,10 +29,6 @@ struct InnuirBPApp: App {
         WindowGroup {
             AppNavigation()
                 .environmentObject(healthKitService)
-                .task {
-                    // Request HealthKit authorization on first launch
-                    await healthKitService.requestAuthorization()
-                }
         }
         .modelContainer(modelContainer)
     }

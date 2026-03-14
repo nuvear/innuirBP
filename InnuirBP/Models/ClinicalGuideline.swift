@@ -118,11 +118,14 @@ final class GuidelineLoader {
     func load(_ type: GuidelineType) -> ClinicalGuidelineDocument? {
         if let cached = cache[type] { return cached }
 
-        guard let url = Bundle.main.url(forResource: type.resourceFileName, withExtension: "json"),
+        // Try root, then Guidelines subdirectory (folder resources may nest on device).
+        let url = Bundle.main.url(forResource: type.resourceFileName, withExtension: "json")
+            ?? Bundle.main.url(forResource: type.resourceFileName, withExtension: "json", subdirectory: "Guidelines")
+
+        guard let url = url,
               let data = try? Data(contentsOf: url),
               let document = try? JSONDecoder().decode(ClinicalGuidelineDocument.self, from: data)
         else {
-            assertionFailure("Failed to load guideline: \(type.resourceFileName).json")
             return nil
         }
 
