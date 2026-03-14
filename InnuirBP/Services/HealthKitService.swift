@@ -63,24 +63,37 @@ final class HealthKitService: ObservableObject {
 
     /// Requests read authorization for blood pressure data from HealthKit.
     ///
-    /// **Important:** `toShare` must be `nil`, not an empty `Set`. Passing an empty
-    /// `Set<HKSampleType>` causes HealthKit to call
-    /// `_throwIfAuthorizationDisallowedForSharing` and throw an `NSException`,
-    /// crashing the app even when the app only needs read access.
-    /// Passing `nil` explicitly tells HealthKit "no write types requested" and
-    /// bypasses the sharing-authorization guard entirely.
+    /// **Why the completion-handler overload?**
+    /// The modern `async throws` overload —
+    /// `requestAuthorization(toShare: Set<HKSampleType>, read:)` — has
+    /// **non-optional** parameters. Passing an empty `Set` for `toShare`
+    /// causes HealthKit to call `_throwIfAuthorizationDisallowedForSharing`,
+    /// which throws an `NSException` (not a Swift `Error`) and crashes the app.
+    ///
+    /// The older completion-handler overload —
+    /// `requestAuthorization(toShare: Set<HKSampleType>?, read:completion:)` —
+    /// accepts `nil` for `toShare`, which explicitly signals "no write access
+    /// requested" and bypasses the sharing-authorization guard entirely.
+    ///
+    /// This is the correct pattern for a read-only HealthKit integration.
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else { return }
 
         let typesToRead: Set<HKObjectType> = [bpCorrelationType, systolicType, diastolicType]
 
-        do {
-            // toShare: nil — we never write to HealthKit; passing [] triggers a crash.
-            try await store.requestAuthorization(toShare: nil, read: typesToRead)
-            isAuthorized = true
-        } catch {
-            syncError = error
-            isAuthorized = false
+        // Use the completion-handler overload so we can pass nil for toShare.
+        // The async overload requires a non-optional Set and crashes with [].
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            store.requestAuthorization(toShare: nil, read: typesToRead) { [weak self] success, error in
+                guard let self else { continuation.resume(); return }
+                if let error {
+                    self.syncError = error
+                    self.isAuthorized = false
+                } else {
+                    self.isAuthorized = success
+                }
+                continuation.resume()
+            }
         }
     }
 
