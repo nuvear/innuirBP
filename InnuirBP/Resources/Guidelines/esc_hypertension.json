@@ -1,0 +1,96 @@
+{
+  "source": "European Society of Cardiology / ESH 2018",
+  "stages": {
+    "optimal": {
+      "name": "Optimal",
+      "thresholds": [120, 80],
+      "bands": [
+        {"from": 120, "to": 0, "color": "gray"},
+        {"from": 80,  "to": 0, "color": "red"}
+      ],
+      "labels": [
+        {"text": "Below 120", "value": 120},
+        {"text": "And",       "value": 100},
+        {"text": "Below 80",  "value": 80}
+      ]
+    },
+
+    "normal": {
+      "name": "Normal",
+      "thresholds": [129, 120, 84, 80],
+      "bands": [
+        {"from": 129, "to": 120, "color": "gray"},
+        {"from": 84,  "to": 80,  "color": "red"}
+      ],
+      "labels": [
+        {"text": "129", "value": 129},
+        {"text": "120", "value": 120},
+        {"text": "And", "value": 102},
+        {"text": "84",  "value": 84},
+        {"text": "80",  "value": 80}
+      ]
+    },
+
+    "highnormal": {
+      "name": "High Normal",
+      "thresholds": [139, 130, 89, 85],
+      "bands": [
+        {"from": 139, "to": 130, "color": "gray"},
+        {"from": 89,  "to": 85,  "color": "red"}
+      ],
+      "labels": [
+        {"text": "139", "value": 139},
+        {"text": "130", "value": 130},
+        {"text": "And", "value": 112},
+        {"text": "89",  "value": 89},
+        {"text": "85",  "value": 85}
+      ]
+    },
+
+    "grade1": {
+      "name": "Grade 1 Hypertension",
+      "thresholds": [159, 140, 99, 90],
+      "bands": [
+        {"from": 159, "to": 140, "color": "gray"},
+        {"from": 99,  "to": 90,  "color": "red"}
+      ],
+      "labels": [
+        {"text": "159", "value": 159},
+        {"text": "140", "value": 140},
+        {"text": "Or",  "value": 120},
+        {"text": "99",  "value": 99},
+        {"text": "90",  "value": 90}
+      ]
+    },
+
+    "grade2": {
+      "name": "Grade 2 Hypertension",
+      "thresholds": [179, 160, 109, 100],
+      "bands": [
+        {"from": 179, "to": 160, "color": "gray"},
+        {"from": 109, "to": 100, "color": "red"}
+      ],
+      "labels": [
+        {"text": "179", "value": 179},
+        {"text": "160", "value": 160},
+        {"text": "Or",  "value": 130},
+        {"text": "109", "value": 109},
+        {"text": "100", "value": 100}
+      ]
+    },
+
+    "grade3": {
+      "name": "Grade 3 Hypertension",
+      "thresholds": [180, 110],
+      "bands": [
+        {"from": 999, "to": 180, "color": "gray"},
+        {"from": 999, "to": 110, "color": "red"}
+      ],
+      "labels": [
+        {"text": "Above 180", "value": 180},
+        {"text": "Or",        "value": 150},
+        {"text": "Above 110", "value": 110}
+      ]
+    }
+  }
+}

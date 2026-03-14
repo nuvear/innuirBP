@@ -1,0 +1,70 @@
+# ── Xcode ────────────────────────────────────────────────────────────────────
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Build artifacts
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ── Swift Package Manager ─────────────────────────────────────────────────────
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# ── CocoaPods (not used, but included for safety) ────────────────────────────
+Pods/
+*.xcworkspace
+
+# ── Carthage ─────────────────────────────────────────────────────────────────
+Carthage/Build/
+
+# ── Fastlane ─────────────────────────────────────────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ── Code signing ─────────────────────────────────────────────────────────────
+*.mobileprovision
+*.p12
+*.cer
+
+# ── OS generated ─────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── Editor / IDE ─────────────────────────────────────────────────────────────
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Test results ─────────────────────────────────────────────────────────────
+*.xcresult
+
+# ── Simulator ────────────────────────────────────────────────────────────────
+*.simctl
+
+# ── Sensitive / environment ───────────────────────────────────────────────────
+.env
+*.pem
+Secrets.swift
+Config.xcconfig
+
+# ── Temporary files ───────────────────────────────────────────────────────────
+*.tmp
+*.log
