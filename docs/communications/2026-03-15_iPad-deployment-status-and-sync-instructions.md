@@ -38,15 +38,21 @@ The InnuirBP app **launches and runs on iPad** (tested on iPad16,6, iOS 26.0.1).
 
 ---
 
-### 2. HealthKit authorization crash (app launch)
+### 2. HealthKit authorization crash (Sync tap)
 
-**Problem:** `requestAuthorization(toShare:read:)` threw `_throwIfAuthorizationDisallowedForSharing` because the app lacked the HealthKit entitlement in its provisioning profile.
+**Two root causes, both fixed:**
 
-**Fixes:**
-- Added `com.apple.developer.healthkit` entitlement to `InnuirBP.entitlements`
-- **Deferred** HealthKit authorization from app launch to first Sync tap (in `SummaryView` toolbar). This allows the app to launch even if the provisioning profile does not yet include HealthKit.
+**Cause A — Wrong API overload:** The async/await overload `requestAuthorization(toShare:read:)` has a non-optional `toShare` parameter. Passing an empty `Set` triggers `_throwIfAuthorizationDisallowedForSharing`, which raises an `NSException`. Swift's `do/catch` cannot catch `NSException`; the process terminates.
 
-**Files:** `InnuirBP/InnuirBP.entitlements`, `InnuirBP/Application/InnuirBPApp.swift`
+**Fix:** Use the completion-handler overload with `toShare: nil`, bridged to async/await via `withCheckedContinuation`. Only the completion-handler API accepts `nil` for read-only authorization.
+
+**Cause B — Missing Info.plist keys:** Apple requires `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription`; without them, the app crashes when requesting authorization.
+
+**Fix:** `InnuirBP/Info.plist` includes both keys with appropriate usage strings.
+
+**Additional:** Added `com.apple.developer.healthkit` entitlement; deferred authorization to first Sync tap so the app launches even before HealthKit is configured.
+
+**Files:** `InnuirBP/Services/HealthKitService.swift`, `InnuirBP/Info.plist`, `InnuirBP/InnuirBP.entitlements`, `InnuirBP/Application/InnuirBPApp.swift`
 
 ---
 
@@ -60,16 +66,25 @@ The InnuirBP app **launches and runs on iPad** (tested on iPad16,6, iOS 26.0.1).
 
 ---
 
-## Data Sync Issue — Root Cause
+## Data Sync Issue — Root Causes (Resolved)
 
-HealthKit sync is triggered when the user taps the **Sync** (↻) button in the Summary screen toolbar. The flow is:
+HealthKit sync is triggered when the user taps the **Sync** (↻) button in the Summary screen toolbar. Two issues caused crashes:
 
-1. `HealthKitService.syncFromHealthKit(context:)` is called
-2. If not authorized, it calls `requestAuthorization()`
-3. `HKHealthStore.requestAuthorization(toShare:read:)` validates the request
-4. **If the App ID does not have HealthKit enabled**, HealthKit throws an exception and the app crashes (or authorization fails silently)
+1. **Wrong API overload:** The async/await `requestAuthorization(toShare:read:)` does not accept `nil` for `toShare`. Passing `[]` triggers `_throwIfAuthorizationDisallowedForSharing` → `NSException` → process termination (Swift cannot catch it).
+2. **Missing Info.plist:** `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` are required; without them, the app crashes on authorization request.
 
-The entitlements file contains `com.apple.developer.healthkit`, but the **provisioning profile** used to sign the app must be generated from an App ID that has HealthKit enabled. This is configured in Apple Developer Portal, not in the project files alone.
+Both are now fixed. Additionally, the **provisioning profile** must include HealthKit (enable it on the App ID in Developer Portal) for authorization to succeed.
+
+---
+
+## What to Do Now
+
+1. In Xcode: **pull the latest** (`git pull origin main`) or let Xcode detect the changes
+2. **Verify Info.plist** is in the target: select Info.plist in the navigator → check it appears under the InnuirBP target in File Inspector. If not, drag it into the target's **Build Phases → Copy Bundle Resources**
+3. **Clean Build Folder** (⇧⌘K)
+4. **Delete the app from the iPad** and reinstall (⌘R)
+5. **Tap Sync** (↻) — the HealthKit permission sheet should appear
+6. **Grant Read access** to Blood Pressure data
 
 ---
 
@@ -128,7 +143,9 @@ Follow these steps to enable HealthKit sync on physical devices.
 | File | Change |
 |------|--------|
 | `InnuirBP/Services/iCloudSyncService.swift` | Simplified `makeModelContainer()` |
+| `InnuirBP/Services/HealthKitService.swift` | Use completion-handler `requestAuthorization(toShare: nil, read:)` instead of async/await overload |
 | `InnuirBP/InnuirBP.entitlements` | Added `com.apple.developer.healthkit` |
+| `InnuirBP/Info.plist` | Added `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription` |
 | `InnuirBP/Application/InnuirBPApp.swift` | Removed HealthKit request from app launch `.task` |
 | `InnuirBP/Models/ClinicalGuideline.swift` | Removed `assertionFailure`; added `Guidelines` subdirectory fallback |
 
