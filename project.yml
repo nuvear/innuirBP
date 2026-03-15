@@ -28,6 +28,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_PREVIEWS: YES
         PROVISIONING_PROFILE_SPECIFIER: "InnuirBP HealthKit Dev"
+        # UIBackgroundModes: [fetch]  # Uncomment when background HealthKit delivery is implemented
     entitlements:
       path: InnuirBP/InnuirBP.entitlements
       properties:
@@ -53,6 +54,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: InnuirBPWidget/InnuirBPWidget.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_EMIT_LOC_STRINGS: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Blood Pressure"
+        SKIP_INSTALL: YES
     entitlements:
       path: InnuirBPWidget/InnuirBPWidget.entitlements
       properties:

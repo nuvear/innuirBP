@@ -11,9 +11,9 @@
 	<key>CFBundleName</key>
 	<string>InnuirBP</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>This app reads blood pressure data from Health to display your readings.</string>
+	<string>Innuir BP needs access to your blood pressure data to display your readings and sync them across your devices.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app does not write to Health.</string>
+	<string>Innuir BP does not write to Health. Manual entries are stored only in the app.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
