@@ -1,0 +1,126 @@
+{
+    "guideline": "ESC/ESH",
+    "version": "2018",
+    "source": "2018 ESC/ESH Guidelines for the management of arterial hypertension",
+    "description": "Guideline from the European Society of Cardiology and European Society of Hypertension.",
+    "stages": [
+        {
+            "id": "grade3",
+            "name": "Grade 3 Hypertension",
+            "shortName": "Grade 3",
+            "systolicMin": 180,
+            "systolicMax": null,
+            "diastolicMin": 110,
+            "diastolicMax": null,
+            "color": "#D93838",
+            "description": "Systolic ≥ 180 mmHg or Diastolic ≥ 110 mmHg."
+        },
+        {
+            "id": "grade2",
+            "name": "Grade 2 Hypertension",
+            "shortName": "Grade 2",
+            "systolicMin": 160,
+            "systolicMax": 180,
+            "diastolicMin": 100,
+            "diastolicMax": 110,
+            "color": "#FF8A00",
+            "description": "Systolic 160–179 mmHg or Diastolic 100–109 mmHg."
+        },
+        {
+            "id": "grade1",
+            "name": "Grade 1 Hypertension",
+            "shortName": "Grade 1",
+            "systolicMin": 140,
+            "systolicMax": 160,
+            "diastolicMin": 90,
+            "diastolicMax": 100,
+            "color": "#FFB800",
+            "description": "Systolic 140–159 mmHg or Diastolic 90–99 mmHg."
+        },
+        {
+            "id": "high-normal",
+            "name": "High Normal",
+            "shortName": "High Normal",
+            "systolicMin": 130,
+            "systolicMax": 140,
+            "diastolicMin": 85,
+            "diastolicMax": 90,
+            "color": "#F2E30C",
+            "description": "Systolic 130–139 mmHg and/or Diastolic 85–89 mmHg."
+        },
+        {
+            "id": "normal",
+            "name": "Normal",
+            "shortName": "Normal",
+            "systolicMin": 120,
+            "systolicMax": 130,
+            "diastolicMin": 80,
+            "diastolicMax": 85,
+            "color": "#5EBA45",
+            "description": "Systolic 120–129 mmHg and/or Diastolic 80–84 mmHg."
+        },
+        {
+            "id": "optimal",
+            "name": "Optimal",
+            "shortName": "Optimal",
+            "systolicMin": null,
+            "systolicMax": 120,
+            "diastolicMin": null,
+            "diastolicMax": 80,
+            "color": "#5EBA45",
+            "description": "Systolic < 120 mmHg and Diastolic < 80 mmHg."
+        }
+    ],
+    "chartBands": [
+        {
+            "id": "optimal-normal-band",
+            "yMin": 0,
+            "yMax": 130,
+            "color": "#8E8E931A",
+            "label": "Optimal/Normal"
+        },
+        {
+            "id": "high-normal-band",
+            "yMin": 130,
+            "yMax": 140,
+            "color": "#FFB8001A",
+            "label": "High Normal"
+        },
+        {
+            "id": "grade1-band",
+            "yMin": 140,
+            "yMax": 160,
+            "color": "#FF8A001A",
+            "label": "Grade 1"
+        },
+        {
+            "id": "grade2-band",
+            "yMin": 160,
+            "yMax": 180,
+            "color": "#D938381A",
+            "label": "Grade 2"
+        }
+    ],
+    "thresholdLines": [
+        {
+            "value": 80,
+            "label": "80",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 90,
+            "label": "90",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 130,
+            "label": "130",
+            "color": "#8E8E93"
+        },
+        {
+            "value": 140,
+            "label": "140",
+            "color": "#8E8E93"
+        }
+    ]
+}

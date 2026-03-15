@@ -68,12 +68,13 @@ The InnuirBP app **launches and runs on iPad** (tested on iPad16,6, iOS 26.0.1).
 
 ## Data Sync Issue — Root Causes (Resolved)
 
-HealthKit sync is triggered when the user taps the **Sync** (↻) button in the Summary screen toolbar. Two issues caused crashes:
+HealthKit sync is triggered when the user taps the **Sync** (↻) button in the Summary screen toolbar. Multiple issues were identified and fixed:
 
 1. **Wrong API overload:** The async/await `requestAuthorization(toShare:read:)` does not accept `nil` for `toShare`. Passing `[]` triggers `_throwIfAuthorizationDisallowedForSharing` → `NSException` → process termination (Swift cannot catch it).
 2. **Missing Info.plist:** `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription` are required; without them, the app crashes on authorization request.
+3. **Missing `com.apple.developer.healthkit.access` (iOS 26):** The HealthKit capability was enabled in Developer Portal and `com.apple.developer.healthkit` was in the entitlements file — but the **`com.apple.developer.healthkit.access`** sub-entitlement was missing. On iOS 26, HealthKit requires this key to define the access scope. Without it, the authorization request is rejected with "Authorization to read the following types is disallowed" even though the base entitlement is present. **Fix:** Added `com.apple.developer.healthkit.access = []` (standard health data scope) to `InnuirBP.entitlements`.
 
-Both are now fixed. Additionally, the **provisioning profile** must include HealthKit (enable it on the App ID in Developer Portal) for authorization to succeed.
+Additionally, the **provisioning profile** must include HealthKit (enable it on the App ID in Developer Portal) for authorization to succeed.
 
 ---
 
@@ -143,11 +144,18 @@ Follow these steps to enable HealthKit sync on physical devices.
 | File | Change |
 |------|--------|
 | `InnuirBP/Services/iCloudSyncService.swift` | Simplified `makeModelContainer()` |
-| `InnuirBP/Services/HealthKitService.swift` | Use completion-handler `requestAuthorization(toShare: nil, read:)` instead of async/await overload |
-| `InnuirBP/InnuirBP.entitlements` | Added `com.apple.developer.healthkit` |
+| `InnuirBP/Services/HealthKitService.swift` | Use completion-handler `requestAuthorization(toShare: nil, read:)`; added pre-flight entitlement check via `InnuirBPIsHealthKitEntitlementAvailable` |
+| `InnuirBP/Services/HealthKitAuthHelper.h` | Added `__attribute__((noinline))`; added `InnuirBPIsHealthKitEntitlementAvailable` pre-flight function |
+| `InnuirBP/Services/HealthKitAuthHelper.m` | `__attribute__((noinline))` on both functions; pre-flight check; improved error messages |
+| `InnuirBP/InnuirBP.entitlements` | Added `com.apple.developer.healthkit`; added `com.apple.developer.healthkit.access = []` (iOS 26) |
+| `InnuirBPWidget/InnuirBPWidget.entitlements` | Added `com.apple.security.application-groups` with `group.com.innuir.bp` (widget can read shared data) |
 | `InnuirBP/Info.plist` | Added `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription` |
 | `InnuirBP/Application/InnuirBPApp.swift` | Removed HealthKit request from app launch `.task` |
 | `InnuirBP/Models/ClinicalGuideline.swift` | Removed `assertionFailure`; added `Guidelines` subdirectory fallback |
+| `InnuirBP/Views/BPDetailView.swift` | `@StateObject` → `@State` for `BPChartViewModel` (@Observable) |
+| `InnuirBP/Views/SummaryView.swift` | `HighlightTilePlaceholder.body` → `bodyText`; added alert to surface sync errors |
+| `InnuirBPWidget/BPWidget.swift` | Removed duplicate `BPReadingSnapshot` (use Shared/) |
+| `InnuirBP.xcodeproj/project.pbxproj` | Removed Info.plist from Copy Bundle Resources |
 
 ---
 
@@ -157,6 +165,51 @@ Follow these steps to enable HealthKit sync on physical devices.
 2. **Add user-facing error handling** when sync fails (e.g., show an alert with `syncError` instead of failing silently)
 3. **Consider re-adding HealthKit request at launch** (optional) once the entitlement is confirmed working, so the permission sheet appears on first open
 4. **Verify guideline JSON bundling** on device if chart bands do not appear (check that `InnuirBP/Resources/Guidelines/*.json` are in the app bundle)
+
+---
+
+## Notes for Development Team
+
+### Build Fixes & Conventions (2026-03-15)
+
+**1. Info.plist — Do NOT add to Copy Bundle Resources**
+
+The main app's `Info.plist` is used via the `INFOPLIST_FILE` build setting. Adding it to **Copy Bundle Resources** causes a duplicate output error: *"Multiple commands produce .../Info.plist"*. Remove it from Copy Bundle Resources if present.
+
+**2. @Observable vs @StateObject**
+
+`BPChartViewModel` uses `@Observable` (iOS 17 Observation framework). Use `@State`, not `@StateObject`:
+
+```swift
+@State private var viewModel = BPChartViewModel()  // ✓
+@StateObject private var viewModel = BPChartViewModel()  // ✗ — requires ObservableObject
+```
+
+**3. SwiftUI View property names — Avoid `body`**
+
+Do not name a stored property `body` in a SwiftUI `View` struct. It conflicts with the required `var body: some View`. Use `bodyText`, `content`, or similar:
+
+```swift
+struct HighlightTilePlaceholder: View {
+    let bodyText: String   // ✓ — not "body"
+    var body: some View { ... }
+}
+```
+
+**4. Shared types — Single definition only**
+
+`BPReadingSnapshot` is defined in `Shared/BPReadingSnapshot.swift` and included in both app and widget targets. Do not redefine it in `BPWidget.swift` or elsewhere — causes "Invalid redeclaration" and "ambiguous for type lookup".
+
+**5. HealthKitService — Use `if` not `guard` for auth flow**
+
+When requesting authorization and then checking success, use `if !isAuthorized` so the block can fall through when authorized. A `guard` body must exit the scope; the inner `guard isAuthorized else { return }` is fine, but the outer must be `if`:
+
+```swift
+if !isAuthorized {
+    await requestAuthorization()
+    guard isAuthorized else { return }
+}
+```
 
 ---
 

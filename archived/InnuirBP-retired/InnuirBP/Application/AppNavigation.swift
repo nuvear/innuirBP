@@ -119,8 +119,9 @@ struct AppNavigation: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        // Auth deferred to Sync tap — calling requestAuthorization at launch can crash
-        // if the provisioning profile lacks the HealthKit entitlement.
+        .task {
+            await healthKitService.requestAuthorization()
+        }
     }
 
     @ViewBuilder

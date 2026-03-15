@@ -2,7 +2,19 @@
 
 A native SwiftUI + Swift Charts application for the Innuir Health Intelligence platform.
 Replicates the Apple Health Blood Pressure chart experience with Innuir-specific extensions:
-AHA/ESC guideline toggle, manual data entry, and iCloud sync across all Apple devices.
+AHA/ESC guideline toggle, manual data entry, HealthKit sync, and iCloud sync across Apple devices.
+
+---
+
+## Quick Start
+
+```bash
+cd innuirBP
+xcodegen generate
+open InnuirBP.xcodeproj
+```
+
+**New engineers:** Read [ONBOARDING.md](ONBOARDING.md) for full setup. Use the **InnuirBP HealthKit Dev** manual provisioning profile for HealthKit sync.
 
 ---
 
@@ -10,7 +22,7 @@ AHA/ESC guideline toggle, manual data entry, and iCloud sync across all Apple de
 
 | Target | Description | Min OS |
 |---|---|---|
-| `InnuirBP` | Main app (iPhone, iPad, Mac Catalyst) | iOS 17+ / macOS 14+ |
+| `InnuirBP` | Main app (iPhone, iPad) | iOS 17+ |
 | `InnuirBPWidget` | WidgetKit extension (Home Screen, Lock Screen) | iOS 17+ |
 
 ---
@@ -18,7 +30,9 @@ AHA/ESC guideline toggle, manual data entry, and iCloud sync across all Apple de
 ## Project Structure
 
 ```
-InnuirBP/
+innuirBP/
+├── project.yml              # XcodeGen — run "xcodegen generate" after edits
+├── InnuirBP.xcodeproj
 ├── InnuirBP/
 │   ├── Application/
 │   │   ├── InnuirBPApp.swift          # @main entry point, ModelContainer, HealthKitService injection
@@ -29,8 +43,9 @@ InnuirBP/
 │   │   └── ClinicalGuideline.swift    # Decodable structs for AHA/ESC JSON guidelines
 │   │
 │   ├── Services/
-│   │   ├── HealthKitService.swift     # HealthKit authorization + HKCorrelation fetch
-│   │   └── iCloudSyncService.swift    # SwiftData ModelContainer with CloudKit configuration
+│   │   ├── HealthKitService.swift     # HealthKit auth + sync + timeout gates
+│   │   ├── HealthKitAuthHelper.h/m    # Obj-C NSException catcher (required)
+│   │   └── iCloudSyncService.swift    # SwiftData ModelContainer
 │   │
 │   ├── ViewModels/
 │   │   └── BPChartViewModel.swift     # @Observable — data aggregation, range/guideline state
@@ -55,41 +70,21 @@ InnuirBP/
 
 ---
 
-## Setup in Xcode
+## Setup
 
-### 1. Create the Xcode Project
+The project uses **XcodeGen**. Generate the Xcode project from `project.yml`:
 
-1. Open Xcode → **File → New → Project**
-2. Choose **iOS → App**
-3. Product Name: `InnuirBP`
-4. Bundle ID: `com.innuir.bp`
-5. Interface: **SwiftUI**, Language: **Swift**, Storage: **SwiftData**
-6. Check **Include Tests**
+```bash
+xcodegen generate
+open InnuirBP.xcodeproj
+```
 
-### 2. Add the Widget Extension
+**Provisioning:** Use the **InnuirBP HealthKit Dev** manual provisioning profile for the InnuirBP target. Automatic signing often omits HealthKit. See [ONBOARDING.md](ONBOARDING.md) for details.
 
-1. **File → New → Target → Widget Extension**
-2. Product Name: `InnuirBPWidget`
-3. Uncheck "Include Configuration Intent" (we use StaticConfiguration)
-
-### 3. Configure Capabilities
-
-For the **InnuirBP** target, enable:
-- **HealthKit** — required for reading BP data from Apple Health
-- **iCloud** (CloudKit) — required for cross-device sync
-- **App Groups** — `group.com.innuir.bp` — required for widget data sharing
-
-For the **InnuirBPWidget** target, enable:
-- **App Groups** — `group.com.innuir.bp`
-
-### 4. Add Resource Files
-
-Copy `aha_hypertension.json` and `esc_hypertension.json` into the `InnuirBP` target's **Resources** folder.
-
-### 5. Add Swift Files
-
-Copy each `.swift` file from this repository into the corresponding folder in your Xcode project,
-ensuring each file is added to the correct target membership.
+**Documentation:**
+- [ONBOARDING.md](ONBOARDING.md) — Full setup for new engineers
+- [CHANGELOG.md](CHANGELOG.md) — Project history and changes
+- [docs/technical/HealthKit-Setup-and-Troubleshooting.md](docs/technical/HealthKit-Setup-and-Troubleshooting.md) — HealthKit configuration
 
 ---
 

@@ -1,0 +1,69 @@
+name: InnuirBP
+options:
+  bundleIdPrefix: com.innuir
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+
+targets:
+  InnuirBP:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: InnuirBP
+        excludes:
+          - "**/Resources/**"
+      - path: Shared
+    resources:
+      - path: InnuirBP/Resources/Guidelines
+        type: folder
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.innuir.bp
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/Frameworks"
+    entitlements:
+      path: InnuirBP/InnuirBP.entitlements
+    dependencies:
+      - target: InnuirBPWidget
+    info:
+      path: InnuirBP/Info.plist
+      properties:
+        CFBundleDisplayName: Innuir BP
+        UIBackgroundModes: [fetch]
+        NSHealthShareUsageDescription: "Innuir BP needs access to your blood pressure data to display your readings and sync them across your devices."
+        NSHealthUpdateUsageDescription: "Innuir BP does not write to Health. Manual entries are stored only in the app."
+
+  InnuirBPWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: InnuirBPWidget
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.innuir.bp.widget
+        INFOPLIST_FILE: InnuirBPWidget/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: "Blood Pressure"
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+    entitlements:
+      path: InnuirBPWidget/InnuirBPWidget.entitlements

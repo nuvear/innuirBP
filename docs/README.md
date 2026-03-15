@@ -9,9 +9,10 @@ This folder is the single source of truth for all project documentation, design 
 ```
 docs/
 ├── communications/     # Session logs, test reports, and inter-team messages
-├── decisions/          # Architecture Decision Records (ADRs)
-├── design/             # Design references, observations, and visual specs
-└── specs/              # Product and technical specification documents
+├── decisions/         # Architecture Decision Records (ADRs)
+├── design/            # Design references, observations, and visual specs
+├── specs/             # Product and technical specification documents
+└── technical/         # Technical reference guides and troubleshooting
 ```
 
 ---
@@ -57,6 +58,16 @@ Product and technical specification documents.
 **Examples:**
 - `innuir_bp_chart_spec_v2.md` — Full product specification (Innuir Platform aligned)
 - `swift_project_blueprint.md` — Engineering blueprint and file architecture
+
+### `technical/`
+
+Technical reference guides for setup, debugging, and avoiding known issues.
+
+**Key documents:**
+- [ONBOARDING.md](../ONBOARDING.md) — **Start here** for new engineers
+- [CHANGELOG.md](../CHANGELOG.md) — Project history and all changes (2026-03-15)
+- [HealthKit-Setup-and-Troubleshooting.md](technical/HealthKit-Setup-and-Troubleshooting.md) — HealthKit configuration, code patterns, error fixes
+- [Deployment-Engineer-Guide.md](technical/Deployment-Engineer-Guide.md) — Xcode build steps, provisioning
 
 ---
 

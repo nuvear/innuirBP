@@ -2,20 +2,32 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!--
-	    NSHealthShareUsageDescription — required by Apple for any app that calls
-	    requestAuthorization(toShare:read:). Without this key the app will crash
-	    immediately when the authorization sheet is triggered, regardless of the
-	    toShare value passed.
-
-	    NSHealthUpdateUsageDescription — required if the app ever writes to
-	    HealthKit. InnuirBP is read-only, but the key must still be present
-	    because the HealthKit capability is enabled in the entitlements file.
-	    Omitting it can cause App Store review rejection.
-	-->
+	<key>CFBundleDisplayName</key>
+	<string>Innuir BP</string>
+	<key>CFBundleExecutable</key>
+	<string>InnuirBP</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleName</key>
+	<string>InnuirBP</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Innuir BP needs access to your blood pressure data to display your readings and sync them across your devices.</string>
+	<string>This app reads blood pressure data from Health to display your readings.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Innuir BP does not write to Health. Manual entries are stored only in the app.</string>
+	<string>This app does not write to Health.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 </dict>
 </plist>
