@@ -1,51 +1,37 @@
 import SwiftUI
 
-struct DataTableView: View {
+struct DataGrid: View {
     @ObservedObject var viewModel: DashboardViewModel
-
-    private let colWidth: CGFloat  = 32
-    private let rowHeight: CGFloat = 20
 
     var body: some View {
         VStack(spacing: 0) {
-            // SYS row
             HStack(spacing: 0) {
-                ForEach(viewModel.allDays, id: \.self) { day in
-                    let avg = sysAvg(for: day)
+                ForEach(viewModel.allDays, id: \.self) {
+                    let avg = sysAvg(for: $0)
                     Text(avg == nil ? "—" : "\(avg!)")
-                        .font(.system(size: 9, design: .monospaced))
                         .foregroundStyle(sysColor(avg))
-                        .frame(width: colWidth, height: rowHeight)
-                        .background(sysBackground(avg))
+                        .frame(width: GridConstants.colWidth, height: GridConstants.sysRowHeight)
                 }
             }
-
-            // DIA row
             HStack(spacing: 0) {
-                ForEach(viewModel.allDays, id: \.self) { day in
-                    let avg = diaAvg(for: day)
+                ForEach(viewModel.allDays, id: \.self) {
+                    let avg = diaAvg(for: $0)
                     Text(avg == nil ? "—" : "\(avg!)")
-                        .font(.system(size: 9, design: .monospaced))
                         .foregroundStyle(diaColor(avg))
-                        .frame(width: colWidth, height: rowHeight)
-                        .background(diaBackground(avg))
+                        .frame(width: GridConstants.colWidth, height: GridConstants.diaRowHeight)
                 }
             }
-
-            // PULSE row
             HStack(spacing: 0) {
-                ForEach(viewModel.allDays, id: \.self) { day in
-                    let avg = pulseAvg(for: day)
+                ForEach(viewModel.allDays, id: \.self) {
+                    let avg = pulseAvg(for: $0)
                     Text(avg == nil ? "—" : "\(avg!)")
-                        .font(.system(size: 9, design: .monospaced))
                         .foregroundStyle(.purple)
-                        .frame(width: colWidth, height: rowHeight)
+                        .frame(width: GridConstants.colWidth, height: GridConstants.pulseRowHeight)
                 }
             }
         }
+        .font(.system(size: 9, design: .monospaced))
     }
-
-    // MARK: - Averages
 
     private func sysAvg(for day: Date) -> Int? {
         guard let r = viewModel.readingsByDay[day], !r.isEmpty else { return nil }
@@ -62,8 +48,6 @@ struct DataTableView: View {
         return r.map(\.pulse).reduce(0, +) / r.count
     }
 
-    // MARK: - Colours
-
     private func sysColor(_ avg: Int?) -> Color {
         guard let v = avg else { return .secondary }
         return v > viewModel.document.patient.targetSystolic ? .red : .cyan
@@ -72,15 +56,5 @@ struct DataTableView: View {
     private func diaColor(_ avg: Int?) -> Color {
         guard let v = avg else { return .secondary }
         return v > viewModel.document.patient.targetDiastolic ? .orange : .brown
-    }
-
-    private func sysBackground(_ avg: Int?) -> Color {
-        guard let v = avg, v > viewModel.document.patient.targetSystolic else { return .clear }
-        return .red.opacity(0.08)
-    }
-
-    private func diaBackground(_ avg: Int?) -> Color {
-        guard let v = avg, v > viewModel.document.patient.targetDiastolic else { return .clear }
-        return .orange.opacity(0.08)
     }
 }

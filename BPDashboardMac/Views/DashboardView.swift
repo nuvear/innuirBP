@@ -2,81 +2,81 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject var viewModel: DashboardViewModel
-
-    private let fixedWidth: CGFloat  = 120
-    private let colWidth: CGFloat    = 32
-    private let chartHeight: CGFloat = 300
-    private let rowHeight: CGFloat   = 20
-    private let timelineHeight: CGFloat = 32
-
-    var totalScrollWidth: CGFloat {
-        CGFloat(viewModel.allDays.count) * colWidth
-    }
+    @State private var scrollPosition: CGPoint = .zero
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Toolbar ────────────────────────────────────────────────────
             ToolbarView(viewModel: viewModel)
                 .background(.bar)
 
             Divider()
 
-            // ── Main Layout ────────────────────────────────────────────────
             HStack(alignment: .top, spacing: 0) {
-
-                // Fixed left panel
-                VStack(alignment: .leading, spacing: 0) {
-                    // Calendar row labels
-                    Group {
-                        Text("MONTH").frame(height: rowHeight)
-                        Text("WEEK").frame(height: rowHeight)
-                        Text("DAY").frame(height: rowHeight)
-                        Text("DOW").frame(height: rowHeight)
-                    }
-                    .font(.caption.bold())
-                    .padding(.leading, 8)
-
-                    // Y-axis label (rotated)
-                    ZStack {
-                        Text("BLOOD PRESSURE (MMHG)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .rotationEffect(.degrees(-90))
-                    }
-                    .frame(width: fixedWidth, height: chartHeight)
-
-                    // Timeline row labels
-                    Group {
-                        Text("NOTES").frame(height: timelineHeight)
-                        Text("MEDS").frame(height: timelineHeight)
-                        Text("SYS").frame(height: rowHeight).foregroundStyle(.cyan)
-                        Text("DIA").frame(height: rowHeight).foregroundStyle(.brown)
-                        Text("PULSE").frame(height: rowHeight).foregroundStyle(.purple)
-                    }
-                    .font(.caption.bold())
-                    .padding(.leading, 8)
-
-                    Spacer()
-                }
-                .frame(width: fixedWidth)
-                .background(.background)
-
+                FixedLeftPanel(viewModel: viewModel)
                 Divider()
-
-                // Scrollable right panel
-                ScrollView(.horizontal, showsIndicators: true) {
-                    VStack(spacing: 0) {
-                        ScrollableCalendarHeader(viewModel: viewModel)
-                        BPChartView(viewModel: viewModel)
-                            .frame(width: totalScrollWidth, height: chartHeight)
-                        AnnotationTimelineView(viewModel: viewModel)
-                        MedicationTimelineView(viewModel: viewModel)
-                        DataTableView(viewModel: viewModel)
-                    }
-                    .frame(width: totalScrollWidth)
-                }
+                ScrollableRightPanel(viewModel: viewModel, scrollPosition: $scrollPosition)
             }
         }
         .navigationTitle("BP Dashboard — \(viewModel.document.patient.name)")
     }
+}
+
+// MARK: - Fixed Left Panel
+struct FixedLeftPanel: View {
+    @ObservedObject var viewModel: DashboardViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("MONTH").frame(height: GridConstants.monthRowHeight)
+            Text("WEEK").frame(height: GridConstants.weekRowHeight)
+            Text("DAY").frame(height: GridConstants.dayRowHeight)
+            Text("DOW").frame(height: GridConstants.dowRowHeight)
+            YAxisView(viewModel: viewModel).frame(height: GridConstants.chartRowHeight)
+            Text("NOTES").frame(height: GridConstants.notesRowHeight)
+            Text("MEDS").frame(height: GridConstants.medsRowHeight)
+            Text("SYS").frame(height: GridConstants.sysRowHeight).foregroundStyle(.cyan)
+            Text("DIA").frame(height: GridConstants.diaRowHeight).foregroundStyle(.brown)
+            Text("PULSE").frame(height: GridConstants.pulseRowHeight).foregroundStyle(.purple)
+            Spacer()
+        }
+        .font(.caption.bold())
+        .padding(.leading, 8)
+        .frame(width: GridConstants.fixedWidth)
+        .background(.background.shadow(.inner(radius: 1, x: -1)))
+    }
+}
+
+// MARK: - Scrollable Right Panel
+struct ScrollableRightPanel: View {
+    @ObservedObject var viewModel: DashboardViewModel
+    @Binding var scrollPosition: CGPoint
+
+    var totalWidth: CGFloat {
+        CGFloat(viewModel.allDays.count) * GridConstants.colWidth
+    }
+
+    var body: some View {
+        ScrollView([.horizontal, .vertical], showsIndicators: true) {
+            VStack(spacing: 0) {
+                CalendarHeaderGrid(viewModel: viewModel)
+                BPChartGrid(viewModel: viewModel)
+                AnnotationGrid(viewModel: viewModel)
+                MedicationGrid(viewModel: viewModel)
+                DataGrid(viewModel: viewModel)
+            }
+            .frame(width: totalWidth)
+            .background(GeometryReader { geo in
+                Color.clear.preference(key: ScrollOffsetPreferenceKey.self, value: geo.frame(in: .named("scroll")).origin)
+            })
+        }
+        .coordinateSpace(name: "scroll")
+        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+            self.scrollPosition = value
+        }
+    }
+}
+
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGPoint = .zero
+    static func reduce(value: inout CGPoint, nextValue: () -> CGPoint) {}
 }

@@ -88,6 +88,13 @@ class DashboardViewModel: ObservableObject {
         let color: Color
     }
 
+    /// The min/max values across all systolic and diastolic readings, used for Y-axis scaling.
+    var valueRange: ClosedRange<Double> {
+        let allValues = document.readings.flatMap { [Double($0.systolic), Double($0.diastolic)] }
+        guard let min = allValues.min(), let max = allValues.max() else { return 50...200 }
+        return (min - 10)...(max + 10)
+    }
+
     var goalBands: [GoalBand] {
         switch selectedStandard {
         case .none:    return []
