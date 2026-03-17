@@ -1,39 +1,46 @@
 import SwiftUI
 
 struct MedicationTimelineView: View {
-    let medications: [Medication]
-    // This will need the date range and positioning logic
+    @ObservedObject var viewModel: DashboardViewModel
+
+    private let colWidth: CGFloat    = 32
+    private let rowHeight: CGFloat   = 32
 
     var body: some View {
-        HStack {
-            ForEach(medications) { medication in
-                Text("\(medication.name) \(medication.dose)")
-                    .padding()
-                    .background(Color(hex: medication.color) ?? .blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+        ZStack(alignment: .leading) {
+            // Background row
+            Rectangle()
+                .fill(Color.clear)
+                .frame(width: CGFloat(viewModel.allDays.count) * colWidth, height: rowHeight)
+
+            ForEach(viewModel.document.medications) { med in
+                let startIdx = max(0, dayIndex(for: med.start))
+                let endIdx   = min(viewModel.allDays.count - 1, dayIndex(for: med.end))
+                guard endIdx >= startIdx else { return AnyView(EmptyView()) }
+                let barWidth = CGFloat(endIdx - startIdx + 1) * colWidth
+
+                return AnyView(
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(med.swiftUIColor)
+                            .frame(width: barWidth, height: 22)
+                        Text("\(med.name) \(med.dose)")
+                            .font(.caption.bold())
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .padding(.leading, 10)
+                            .frame(width: barWidth, alignment: .leading)
+                    }
+                    .offset(x: CGFloat(startIdx) * colWidth)
+                )
             }
         }
+        .frame(height: rowHeight)
     }
-}
 
-// Helper to convert hex color string to SwiftUI Color
-extension Color {
-    init?(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3:
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6:
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8:
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            return nil
-        }
-        self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: Double(a) / 255)
+    private func dayIndex(for date: Date) -> Int {
+        let cal = Calendar.current
+        let comps = cal.dateComponents([.day], from: viewModel.dateRange.lowerBound, to: date)
+        return comps.day ?? 0
     }
 }

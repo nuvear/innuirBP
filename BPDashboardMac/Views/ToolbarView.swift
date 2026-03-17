@@ -1,33 +1,45 @@
 import SwiftUI
 
 struct ToolbarView: View {
-    // This will need bindings to control the main view state
-    
+    @ObservedObject var viewModel: DashboardViewModel
+
     var body: some View {
-        HStack {
-            Text("View:")
-            Picker("View", selection: .constant("Month")) {
-                Text("Week").tag("Week")
-                Text("Month").tag("Month")
-                Text("Year").tag("Year")
-            }.pickerStyle(SegmentedPickerStyle())
+        HStack(spacing: 16) {
+            // View range picker
+            HStack(spacing: 4) {
+                Text("View:").font(.caption).foregroundStyle(.secondary)
+                Picker("View", selection: $viewModel.selectedView) {
+                    ForEach(BPTimeRange.allCases) { range in
+                        Text(range.rawValue).tag(range)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 200)
+            }
 
             Spacer()
 
-            Text("Smoothing:")
-            Toggle("LOWESS", isOn: .constant(true))
+            // Smoothing toggle
+            HStack(spacing: 6) {
+                Text("Smoothing:").font(.caption).foregroundStyle(.secondary)
+                Toggle("LOWESS", isOn: $viewModel.showSmoothing)
+                    .toggleStyle(.checkbox)
+            }
 
             Spacer()
 
-            Text("Standard:")
-            Picker("Standard", selection: .constant("None")) {
-                Text("None").tag("None")
-                Text("ACC/AHA").tag("ACC/AHA")
-                Text("ESC/ESH").tag("ESC/ESH")
-                Text("JSH").tag("JSH")
-                Text("ISH").tag("ISH")
+            // Clinical standard picker
+            HStack(spacing: 4) {
+                Text("Standard:").font(.caption).foregroundStyle(.secondary)
+                Picker("Standard", selection: $viewModel.selectedStandard) {
+                    ForEach(ClinicalStandard.allCases) { s in
+                        Text(s.rawValue).tag(s)
+                    }
+                }
+                .frame(width: 140)
             }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
 }
